@@ -18,8 +18,26 @@ public:
   bool is_avail(const ext_vector<int>& req) const { return req < avail; }
 
   bool is_safe(int id, const ext_vector<int>& req) {
-    
-    return true; }   // TODO: determine if alloc is safe
+    // TODO:  implement check for request not leading to deadlock
+
+    bool result = false;
+    Customer* tempCustomer = customers[id];
+    ext_vector<int> availCopy = avail;
+    ext_vector<Customer*> customersCopy = customers;
+
+    tempCustomer -> alloc_req(req); // grant request (temporarily) to customer
+    availCopy -= req;
+
+    for( int i = 0; i < customersCopy.size() - 1; i++ ) { // go through list of customers, are there enough resources for at least one customer to get to its max?
+      //std::cout << "Customer need: " << customersCopy[i]->get_need() << "\n Avail:" << availCopy << std::endl;
+      if( customersCopy[i]->get_need() <= availCopy ) {
+        result = true;
+      }
+    }
+    tempCustomer -> dealloc_req( req );// roll back request
+    availCopy += req;
+    return result; // return answer;
+  }
 
   bool req_approved(int id, const ext_vector<int>& req) {
     if (req > avail) { return false; }

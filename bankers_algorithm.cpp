@@ -12,13 +12,28 @@
 #include "customer.h"
 #include "utils.h"
 
+#define MUTEX_SAFE(x) pthread_mutex_lock(&mutex_); \
+                      x; \
+                      pthread_mutex_unlock(&mutex_);
+
 //
 pthread_mutex_t mutex_;  // prevents intermingled printing by threads (customers)
 //
 //
+//
+class MutexLock {
+ public:
+  MutexLock(pthread_mutex_t* pmutex)
+  : pmutex_(pmutex) {
+   pthread_mutex_lock(pmutex);
+  }
+  ~MutexLock() { pthread_mutex_unlock(pmutex_); } private:
+  pthread_mutex_t* pmutex_;
+ };
+
 void run_customer_bank_tests() {
   ext_vector<int> alloc = { 3, 1, 5 };
-  
+
   ext_vector<int> max  = { 5, 2, 6 };
   ext_vector<int> need = max - alloc;
   ext_vector<int> avail = alloc + need + ext_vector<int>({ 3, 3, 3 });
@@ -84,14 +99,17 @@ void run_customer_bank_tests() {
 //
 void* runner(void* param) {           // thread runner
   Customer* c = (Customer*)param;
+  int counter = 0;
 
+  // MutexLock ml(&mutex_);  // auto-unlocking mutex class
+  // if (counter >= 100) {
+  //  std::cout << "........................................WARNING: COUNTER EXCEEDED:" << counter << "\n";
+  // }
   pthread_mutex_lock(&mutex_);
   std::cout << "<<< Customer thread p#" << c->get_id() << " started... >>>\n";
   pthread_mutex_unlock(&mutex_);
 
   Bank* b = c->get_bank();
-
-  int counter = 0;
 
   while (!c->needs_met() && counter++ < 100) {
     ext_vector<int> req = c->create_req();
@@ -112,6 +130,9 @@ void* runner(void* param) {           // thread runner
       }
     }
   }
+  // if (counter >= 100) {
+  //  std::cout << "........................................WARNING: COUNTER EXCEEDED:" << counter << "\n";
+  // }
   pthread_mutex_lock(&mutex_);
   std::cout << ">>>>>>>>>>>>>>> Customer thread p#" << c->get_id() << " shutting down... <<<<<<<<<<<<<<<<<\n\n";
   b->show();
@@ -211,19 +232,17 @@ void process_files(int argc, const char* argv[], Bank*& bank) {    // processes 
     process_file(filename, bank);
 
     if (bank->get_customers().empty()) { std::cerr << "\t\tNo customers found... exiting...\n\n";  exit(1); }
-    else { bank->show(); }   // TODO: remove this line
-    
+    //else { bank->show(); }   // TODO: remove this line
+
     run_simulation(bank);
     std::cout << "\n\n\n";
   }
 }
 
-
-
 int main(int argc, const char * argv[]) {
-//  ext_vector<int>::run_tests();
-  
-//  run_customer_bank_tests();
+  // ext_vector<int>::run_tests();
+  //
+  // run_customer_bank_tests();
 
   Bank* bank = nullptr;
 
@@ -233,4 +252,3 @@ int main(int argc, const char * argv[]) {
   std::cout << "\n\t\t...done.\n";
   return 0;
 }
-
