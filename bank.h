@@ -29,8 +29,8 @@ public:
     availCopy -= req;
 
     for( int i = 0; i < customersCopy.size() - 1; i++ ) { // go through list of customers, are there enough resources for at least one customer to get to its max?
-      //std::cout << "Customer need: " << customersCopy[i]->get_need() << "\n Avail:" << availCopy << std::endl;
-      if( customersCopy[i]->get_need() <= availCopy ) {
+      std::cout << "Customer need: " << customersCopy[i]->get_need() << "\n Avail:" << availCopy << std::endl;
+      if( customersCopy[i]->needs_exceeded(availCopy) ) {
         result = true;
       }
     }

@@ -105,9 +105,9 @@ void* runner(void* param) {           // thread runner
   // if (counter >= 100) {
   //  std::cout << "........................................WARNING: COUNTER EXCEEDED:" << counter << "\n";
   // }
-  pthread_mutex_lock(&mutex_);
+//  pthread_mutex_lock(&mutex_);
   std::cout << "<<< Customer thread p#" << c->get_id() << " started... >>>\n";
-  pthread_mutex_unlock(&mutex_);
+//  pthread_mutex_unlock(&mutex_);
 
   Bank* b = c->get_bank();
 
@@ -133,10 +133,10 @@ void* runner(void* param) {           // thread runner
   // if (counter >= 100) {
   //  std::cout << "........................................WARNING: COUNTER EXCEEDED:" << counter << "\n";
   // }
-  pthread_mutex_lock(&mutex_);
+  // pthread_mutex_lock(&mutex_);
   std::cout << ">>>>>>>>>>>>>>> Customer thread p#" << c->get_id() << " shutting down... <<<<<<<<<<<<<<<<<\n\n";
   b->show();
-  pthread_mutex_unlock(&mutex_);
+  // pthread_mutex_unlock(&mutex_);
 
   pthread_exit(0);
 }
